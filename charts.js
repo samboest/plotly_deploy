@@ -71,19 +71,18 @@ function buildCharts(sample) {
 
     var samplesValues = result.sample_values;
 
-
     // 7. Create the yticks for the bar chart.
     // Hint: Get the the top 10 otu_ids and map them in descending order  
     //  so the otu_ids with the most bacteria are last. 
 
-    var yticks = samplesValues.slice(0,10).map(val => val.append("OTU ".sample_values)).reverse();
+    var yticks = otuIds.slice(0,10).map(val => `OTU ${val}`).reverse();
 
     // 8. Create the trace for the bar chart. 
     var barData = [{
       
-      x: samplesValues,
+      x: samplesValues.slice(0, 10).reverse(),
 
-      y: otuIds,
+      y: yticks,
 
       text: otuLabels,
 
@@ -97,13 +96,73 @@ function buildCharts(sample) {
     var barLayout = {
 
       title: "Top 10 Bacteria Culteres Found",
-      xaxis: {title: "Culture IDs"},
-      yaxis: {title: 'Culture Volume'}
+      xaxis: {title: "Culture Volume"},
+      yaxis: {title: 'Culture IDs'}
      
     };
     // 10. Use Plotly to plot the data with the layout. 
-    Plotly.newPlot("bar", [barData], barLayout)
+    Plotly.newPlot("bar", barData, barLayout)
 
-  });
+    // 1. Create the trace for the bubble chart.
+    var bubbleData = [{
+      x: otuIds,
+      y: samplesValues,
+      text: otuLabels,
+      mode: "markers",
+      marker: {
+        size: samplesValues,
+        color: otuIds,
+      }   
+    }];
+
+    // 2. Create the layout for the bubble chart.
+    var bubbleLayout = {
+
+    title: "Top 10 Cultures per Sample",
+    showledgend: false,
+    height: 600,
+    width: 1200,
+
+        };
+    // 3. Use Plotly to plot the data with the layout.
+    Plotly.newPlot("bubble", bubbleData, bubbleLayout);
+  
+  }); 
+  // To GET the wfreq from data 
+    d3.json("samples.json").then((data) => {
+      var metadata = data.metadata;
+      // Filter the data for the object with the desired sample number
+      var resultArray = metadata.filter(sampleObj => sampleObj.id == sample);
+      var result = resultArray[0];console.log(result);
+      var wfreq = result.wfreq;
+
+    // The guage chart
+    var gaugeData = [
+      {
+      domain: { x: [0, 1], y: [0, 1] },
+      value: wfreq,
+      title: {text: `<b>Belly Button Washing Frequency</b><br>Scrubs per Week`},
+      type: "indicator",
+      
+      mode: "gauge+number",
+      gauge: {axis: { range: [null, 10]},
+                steps: [
+                {range: [0, 2], color: "red"},
+                {range: [2, 4], color: "orange"},
+                {range: [4, 6], color: "yellow"},
+                {range: [6, 8], color: "greenyellow"},
+                {range: [8, 10], color: "green"},
+                ]}
+              }];
+    // 2. Create the layout for the bubble chart.
+    var bubbleLayout = {
+      width: 700, 
+      height: 450, 
+      margin: { t: 20, b: 40, l:100, r:100 } 
+    };
+
+    // 3. Use Plotly to plot the data with the layout.
+    Plotly.newPlot("gauge", gaugeData, bubbleLayout); 
+  })
 }
 
