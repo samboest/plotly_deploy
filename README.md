@@ -1,1 +1,3 @@
-# plotly_deploy
+# Plotly Assignment - Bacteria Diversity
+
+![](resources/img.png)
